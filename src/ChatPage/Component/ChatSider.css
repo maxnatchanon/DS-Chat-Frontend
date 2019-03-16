@@ -1,0 +1,53 @@
+.chat-header {
+    color: var(--light-text-color);
+    font-size: 1.50em;
+    margin-top: 12px;
+    margin-bottom: -10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 15px;
+}
+
+.chat-header > span {
+    font-size: 1.10em;
+}
+
+.divider {
+    margin: 13px 12px -20px 12px;
+}
+
+.divider > * {
+    background-color: rgba(255, 255, 255, 0.425);
+}
+
+.c-background > .sider {
+    width: 20% !important;
+    max-width: 350px !important;
+    min-width: 350px !important;
+}
+
+.sider, .ant-menu-dark {
+    background-color: var(--dark-bg-color);
+}
+
+.ant-menu-sub {
+    background-color: #182029 !important;
+    box-shadow: none !important;
+}
+
+.ant-menu-item-selected {
+    background-color: #0e1218 !important;
+}
+
+.ant-popover-placement-bottomLeft {
+    left: 5px !important;
+}
+
+.ant-popover-inner-content {
+    padding: 8px 16px;
+}
+
+.ant-popover-inner-content > a {
+    color: var(--dark-text-color);
+}
