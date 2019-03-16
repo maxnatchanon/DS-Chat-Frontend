@@ -4,27 +4,57 @@ import 'antd/dist/antd.css';
 import './ChatContent.css';
 
 export default class ChatContent extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            inputMessage: '',
+            disableSend: true,
+        }
+    }
+
+    handleInputChange = (e) => {
+        this.setState({
+            ...this.state,
+            inputMessage: e.target.value,
+        }, () => {
+            this.checkSendable();
+        });
+        
+    }
+
+    checkSendable = () => {
+        const notSendable = (this.state.inputMessage.trim() === '');
+        this.setState({
+            ...this.state,
+            disableSend: notSendable,
+        });
+    }
+
     render() {
         const {Content} = Layout;
         return (
             <Content className='chat-content-container'>
-                <div className='chat-content-header center-child'>Group A</div>
+                <div className='chat-content-header center-child'>
+                    { this.props.selectedGroup }
+                </div>
                 <div className='chat-content-divider'><Divider/></div>
                 <div className='chat-message-container'>
-                    <Message
-                        message={{text: 'Hi, how are you?', sender: 'A', timestamp: '2.22 AM'}}
-                        uid={'B'}
-                    />
-                    <Message
-                        message={{text: "I'm fine!", sender: 'B', timestamp: '2.24 AM'}}
-                        uid={'B'}
-                    />
+                    { this.props.messages.map((msg,idx) => 
+                        <Message key={idx}
+                        message={{text: msg.message, sender: msg.clientID, timestamp: msg.timestamp}}
+                        uid={this.props.clientID}
+                        /> 
+                    ) }
                 </div>
                 <div className='message-input-container'>
                     <Divider className='chat-input-divider'/>
                     <div>
-                        <Input></Input>
-                        <Button>SEND</Button>
+                        <Input onChange={this.handleInputChange}></Input>
+                        <Button 
+                        disabled={this.state.disableSend}
+                        onClick={(e)=>this.props.handleSendMessage(this.state.inputMessage.trim())}>
+                            SEND
+                        </Button>
                     </div>
                 </div>
             </Content>

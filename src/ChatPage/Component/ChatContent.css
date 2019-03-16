@@ -23,7 +23,7 @@
 
 .chat-message-container {
     width: 100%;
-    height: calc(100% - 111px);
+    height: calc(100% - 112px);
     overflow-y: scroll;
     padding-bottom: 15px;
 }
@@ -83,6 +83,8 @@
     padding: 8px 18px;
     border-radius: 12px;
     font-size: 1.1em;
+    word-wrap: break-word;
+    text-align: left;
 }
 
 .timestamp {
