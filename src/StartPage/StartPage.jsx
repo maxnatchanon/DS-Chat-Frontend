@@ -25,7 +25,7 @@ class StartPage extends Component {
 
     render() {
         return (
-            <div className='background center-child'>
+            <div className='s-background center-child'>
                 <div className='login-container'>
                     <div className='header center-child'>F DS For Sure</div>
                     <div className='body center-child'>
