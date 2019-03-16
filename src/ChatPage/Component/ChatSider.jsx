@@ -23,15 +23,20 @@ export default class ChatSider extends Component {
                     <Icon onClick={this.props.handleAddGroup} type='plus'/>
                 </div>
                 <div className='divider'><Divider/></div>
-                <Menu theme='dark' mode='inline' defaultOpenKeys={['joinedGroup']}>
+                <Menu
+                theme='dark' mode='inline'
+                defaultOpenKeys={['joinedGroup']}
+                selectedKeys={[this.props.state.selected]}
+                onSelect={this.props.handleMenuSelect}
+                >
                     <SubMenu key='joinedGroup' title={<span><Icon type="check-circle"/>Joined group</span>}>
-                        { this.props.state.joinedList.map((group,idx) => 
-                            <Menu.Item key={'j-'+idx}>{group}</Menu.Item>
+                        { this.props.state.joinedList.map((group) => 
+                            <Menu.Item key={'j'+group}>{group}</Menu.Item>
                         ) }
                     </SubMenu>
                     <SubMenu key='allGroup' title={<span><Icon type="bars"/>All Group</span>}>
-                        { this.props.state.allList.map((group,idx) => 
-                            <Menu.Item key={'a-'+idx}>{group}</Menu.Item>
+                        { this.props.state.allList.map((group) => 
+                            <Menu.Item key={'a'+group}>{group}</Menu.Item>
                         ) }
                     </SubMenu>
                 </Menu>

@@ -36,7 +36,7 @@ class Message extends Component {
     // { { text, sender, timestamp }, uid }
 
     render() {
-        const isMyMsg = (this.props.message.sender == this.props.uid);
+        const isMyMsg = (this.props.message.sender === this.props.uid);
         return (
             <div className={'message-container message-' + ((isMyMsg) ? 'right' : 'left')}>
                 <div className='sender'>

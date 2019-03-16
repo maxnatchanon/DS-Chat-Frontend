@@ -13,7 +13,7 @@ class ChatPage extends Component {
         this.state = {
             joinedList: ['Group A', 'Group B', 'Group C', 'Group D'],
             allList: ['Group A', 'Group B', 'Group C', 'Group D', 'Group E', 'Group F', 'Group G'],
-            selected: 'j-0',
+            selected: 'jGroup A',
             settingVisible: false,
         }
     }
@@ -23,6 +23,14 @@ class ChatPage extends Component {
             ...this.state,
             settingVisible: visible,
         })
+    }
+
+    handleMenuSelect = (e) => {
+        this.setState({
+            ...this.state,
+            selected: e.key,
+        })
+        // TODO: Change chat content / Show join dialog
     }
 
     handleAddGroup = () => {
@@ -40,6 +48,7 @@ class ChatPage extends Component {
                 handleLogOut={this.handleLogOut}
                 handleAddGroup={this.handleAddGroup}
                 handlePopOverChange={this.handlePopOverChange}
+                handleMenuSelect={this.handleMenuSelect}
                 state={this.state}
                 />
                 <ChatContent
