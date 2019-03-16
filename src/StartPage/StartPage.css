@@ -1,0 +1,44 @@
+.background {
+    background-color: var(--light-bg-color);
+    width: 100%;
+    height: 100%;
+}
+
+.login-container {
+    background-color: white;
+    width: 320px;
+    height: 222px;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgb(0, 0, 0, 0.15);
+}
+
+.login-container > .header {
+    background-color: var(--highlight-color);
+    height: 60px;
+    border-radius: 12px 12px 0 0;
+    color: var(--light-text-color);
+    font-size: 2em;
+    font-weight: 400;
+}
+
+.login-container > .body {
+    flex-direction: column;
+}
+
+.login-container > .body > Input {
+    width: 80%;
+    margin: 30px 0 20px 0;
+    text-align: center;
+    font-size: 1.25em;
+}
+
+.login-container > .body > Button {
+    width: 60%;
+    height: 40px;
+    background-color: var(--highlight-ops-color);
+    border-color: var(--highlight-ops-color);
+    color: var(--light-text-color);
+    font-size: 1.2em;
+    font-weight: 500;
+    padding-top: 2px;
+}

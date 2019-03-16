@@ -31,3 +31,24 @@
     transform: rotate(360deg);
   }
 }
+
+#root {
+  width: 100%;
+  height: 100%;
+  color: var(--dark-text-color);
+}
+
+:root {
+  --dark-bg-color: #273441;
+  --light-bg-color: #F5F9FD;
+  --light-text-color: #FFFFFF;
+  --dark-text-color: rgb(58, 46, 46);
+  --highlight-color: #578EC9;
+  --highlight-ops-color: rgb(255, 156, 62);
+}
+
+.center-child {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
