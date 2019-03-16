@@ -4,6 +4,7 @@ import 'antd/dist/antd.css';
 import './ChatPage.css';
 
 import ChatSider from './Component/ChatSider';
+import ChatContent from './Component/ChatContent';
 
 class ChatPage extends Component {
 
@@ -33,7 +34,6 @@ class ChatPage extends Component {
     }
 
     render() {
-        const {Content} = Layout;
         return (
             <Layout className='c-background'>
                 <ChatSider
@@ -42,9 +42,9 @@ class ChatPage extends Component {
                 handlePopOverChange={this.handlePopOverChange}
                 state={this.state}
                 />
-                <Content>
-                    
-                </Content>
+                <ChatContent
+                
+                />
             </Layout>
         )
     }
