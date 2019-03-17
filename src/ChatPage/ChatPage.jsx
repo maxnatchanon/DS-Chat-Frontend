@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Layout, message } from 'antd';
+import { Layout, message, Modal, Button, Input } from 'antd';
 import Cookies from 'universal-cookie';
 import 'antd/dist/antd.css';
 import './ChatPage.css';
@@ -22,6 +22,8 @@ class ChatPage extends Component {
             allList: ['Group A', 'Group B', 'Group C', 'Group D', 'Group E', 'Group F', 'Group G'],
             selected: 'jGroup A',
             settingVisible: false,
+            createVisible: false,
+            createName: '',
             clientID: 'Max',
             selectedGroup: 'Group A',
             messages: [
@@ -232,10 +234,6 @@ class ChatPage extends Component {
         // TODO: Change chat content / Show join dialog
     }
 
-    handleAddGroup = () => {
-        // TODO: Show add group form
-    }
-
     handleLogOut = () => {
         // TODO: Log out
     }
@@ -245,22 +243,60 @@ class ChatPage extends Component {
         console.log(msg)
     }
 
+    handleCreateGroup = () => {
+        this.setState({
+            ...this.state,
+            createVisible: true,
+            createName: '',
+        });
+    }
+
+    handleCreateGroupSubmit = () => {
+        if (this.state.createName !== '') {
+            const gid = this.state.createName;
+            // TODO: Create new group with gid
+        }
+        else {
+            message.error('Group name cannot be empty')
+        }
+        
+    }
+
     render() {
         return (
             <Layout className='c-background'>
                 <ChatSider
                 handleLogOut={this.handleLogOut}
-                handleAddGroup={this.handleAddGroup}
+                handleCreateGroup={this.handleCreateGroup}
                 handlePopOverChange={this.handlePopOverChange}
                 handleMenuSelect={this.handleMenuSelect}
                 state={this.state}
                 />
+
                 <ChatContent
                 messages={this.state.messages}
                 clientID={this.state.clientID}
                 handleSendMessage={this.handleSendMessage}
                 selectedGroup={this.state.selectedGroup}
                 />
+
+                <Modal
+                visible={this.state.createVisible}
+                onOk={this.handleOk}
+                onCancel={() => {this.setState({...this.state, createVisible: false,})}}
+                footer={null}
+                >
+                    <div className='create-container center-child'>
+                        <h2>Create new group</h2>
+                        <Input
+                        placeholder='Group name'
+                        value={this.state.createName}
+                        onChange={(e)=>{this.setState({...this.state,createName: e.target.value,});
+                        }}
+                        />
+                        <Button onClick={this.handleCreateGroupSubmit}>CREATE</Button>
+                    </div>
+                </Modal>
             </Layout>
         )
     }

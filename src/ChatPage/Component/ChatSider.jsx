@@ -20,7 +20,7 @@ export default class ChatSider extends Component {
                         <Icon type='setting'/>
                     </Popover>
                     <span>Chat</span>
-                    <Icon onClick={this.props.handleAddGroup} type='plus'/>
+                    <Icon onClick={this.props.handleCreateGroup} type='plus'/>
                 </div>
                 <div className='divider'><Divider/></div>
                 <Menu
