@@ -31,12 +31,12 @@ export default class ChatSider extends Component {
                 >
                     <SubMenu key='joinedGroup' title={<span><Icon type="check-circle"/>Joined group</span>}>
                         { this.props.state.joinedList.map((group) => 
-                            <Menu.Item key={'j'+group}>{group}</Menu.Item>
+                            <Menu.Item key={'j'+group.name}>{group.name}</Menu.Item>
                         ) }
                     </SubMenu>
                     <SubMenu key='allGroup' title={<span><Icon type="bars"/>All Group</span>}>
                         { this.props.state.allList.map((group) => 
-                            <Menu.Item key={'a'+group}>{group}</Menu.Item>
+                            <Menu.Item key={'a'+group.name}>{group.name}</Menu.Item>
                         ) }
                     </SubMenu>
                 </Menu>

@@ -12,6 +12,19 @@ export default class ChatContent extends Component {
         }
     }
 
+    componentDidMount = () => {
+        window.onkeyup = (e) => {
+            const key = e.keyCode ? e.keyCode : e.which;
+            const disabled = this.state.disableSend;
+            if (document.activeElement.id === 'message-input' && key === 13) {
+                if (!disabled) {
+                    this.props.handleSendMessage(this.state.inputMessage.trim());
+                    this.setState({...this.state, inputMessage: '',})
+                }
+            }
+        }
+    }
+
     handleInputChange = (e) => {
         this.setState({
             ...this.state,
@@ -19,7 +32,6 @@ export default class ChatContent extends Component {
         }, () => {
             this.checkSendable();
         });
-        
     }
 
     checkSendable = () => {
@@ -41,7 +53,7 @@ export default class ChatContent extends Component {
                 <div className='chat-message-container'>
                     { this.props.messages.map((msg,idx) => 
                         <Message key={idx}
-                        message={{text: msg.message, sender: msg.clientID, timestamp: msg.timestamp}}
+                        message={{text: msg.content, sender: msg.uid, timestamp: msg.send_at}}
                         uid={this.props.clientID}
                         /> 
                     ) }
@@ -49,10 +61,13 @@ export default class ChatContent extends Component {
                 <div className='message-input-container'>
                     <Divider className='chat-input-divider'/>
                     <div>
-                        <Input onChange={this.handleInputChange}></Input>
+                        <Input id='message-input' onChange={this.handleInputChange} value={this.state.inputMessage}></Input>
                         <Button 
                         disabled={this.state.disableSend}
-                        onClick={(e)=>this.props.handleSendMessage(this.state.inputMessage.trim())}>
+                        onClick={(e)=>{
+                            this.props.handleSendMessage(this.state.inputMessage.trim());
+                            this.setState({...this.state, inputMessage: '',})
+                        }}>
                             SEND
                         </Button>
                     </div>
@@ -63,7 +78,17 @@ export default class ChatContent extends Component {
 }
 
 class Message extends Component {
-    // { { text, sender, timestamp }, uid }
+
+    formatDate = (date) => {
+        var res = '';
+        try {
+            res = date.getHours() + ':' + date.getMinutes();
+        }
+        catch {
+            res = '';
+        }
+        return res;
+    }
 
     render() {
         const isMyMsg = (this.props.message.sender === this.props.uid);
@@ -77,7 +102,7 @@ class Message extends Component {
                         { this.props.message.text }
                     </div>
                     <div className='timestamp'>
-                        { this.props.message.timestamp }
+                        { this.formatDate(this.props.message.timestamp) }
                     </div>
                 </div>
                 

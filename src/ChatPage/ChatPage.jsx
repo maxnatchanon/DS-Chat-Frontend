@@ -4,7 +4,7 @@ import Cookies from 'universal-cookie';
 import 'antd/dist/antd.css';
 import './ChatPage.css';
 import axios from 'axios';
-import io from 'socket.io-client';
+// import io from 'socket.io-client';
 import ip from '../ip';
 
 import ChatSider from './Component/ChatSider';
@@ -13,25 +13,24 @@ import ChatContent from './Component/ChatContent';
 const cookies = new Cookies();
 class ChatPage extends Component {
 
-    socket = io();
+    // socket = io();
 
     constructor(props) {
         super(props);
         this.state = {
-            joinedList: ['Group A', 'Group B', 'Group C', 'Group D'],
-            allList: ['Group A', 'Group B', 'Group C', 'Group D', 'Group E', 'Group F', 'Group G'],
+            joinedList: [{name: 'Group A'}, {name: 'Group B'}, {name: 'Group C'}, {name: 'Group D'},],
+            allList: [{name: 'Group A'}, {name: 'Group B'}, {name: 'Group C'}, {name: 'Group D'}, {name: 'Group E'}, {name: 'Group F'},],
             selected: 'jGroup A',
             settingVisible: false,
             createVisible: false,
             createName: '',
-            clientID: 'Max',
             messages: [
-                {message: 'Hi! How are you?', timestamp: '23.30 PM', clientID: 'Sun'},
-                {message: 'I\'m fine. Thanks!', timestamp: '23.34 PM', clientID: 'Max'},
-                {message: 'https://github.com/manussawee/dissys_miniproject', timestamp: '23.38 PM', clientID: 'Max'},
-                {message: 'Just copy it!', timestamp: '23.39 PM', clientID: 'Yoss'},
-                {message: 'Why parallel is so easy?', timestamp: '23.39 PM', clientID: 'Jui'},
-                {message: '...', timestamp: '23.39 PM', clientID: 'Tan'},
+                {gid: 'A', uid: 'Max', content: 'Mockup chat incoming.', send_at: new Date()},
+                {gid: 'A', uid: 'Max', content: 'https://github.com/manussawee/dissys_miniproject/', send_at: new Date()},
+                {gid: 'A', uid: 'Yoss', content: 'Just copy it!', send_at: new Date()},
+                {gid: 'A', uid: 'Sun', content: '🔥', send_at: new Date()},
+                {gid: 'A', uid: 'Jui', content: 'Why is parallel so easy?', send_at: new Date()},
+                {gid: 'A', uid: 'Tan', content: '...', send_at: new Date()},
             ],
         }
     }
@@ -43,17 +42,6 @@ class ChatPage extends Component {
         this.getAllgroup();
     }
 
-    // Get unread messages with uid and gid
-    getUnreadMessage = (gid) => {
-        axios.get(ip.loadBalancer + '/viewunreadm?uid=' + cookies.get('uid') + '&gid=' + gid)
-        .then((res) => {
-            this.setState({
-                ...this.state,
-                messages: res.data.messages,
-            })
-        });
-    }
-
     // Get joined groups -> joinedList
     getJoinedGroups = () => { 
         axios.get(ip.loadBalancer + `/getuserinformation?uid=${cookies.get('uid')}`)
@@ -62,7 +50,12 @@ class ChatPage extends Component {
             this.setState({
                 ...this.state,
                 joinedList: myData,
+                messages: [],
+                selected: '',
             });
+        }).catch((err) => {
+            console.error(err);
+            message.error('Error getting joined groups');
         });
     }
 
@@ -76,6 +69,7 @@ class ChatPage extends Component {
             })
         }).catch((err) => {
             console.error(err);
+            message.error('Error getting all groups');
         });
     }
 
@@ -92,7 +86,7 @@ class ChatPage extends Component {
             gid: gid 
         }).then((res) => {
             if (res.data === 'Already joined' || res.data === 'Joined') {
-                // TODO: Get unread message -> messages
+                this.getUnreadMessage(gid, false);
             }
             else {
                 message.error(res.body);
@@ -100,6 +94,20 @@ class ChatPage extends Component {
         }).catch((err) => {
             message.error('Join group error')
             console.error(err);
+        });
+    }
+
+    // Get unread messages with uid and gid
+    getUnreadMessage = (gid, append) => {
+        axios.get(ip.loadBalancer + '/viewunreadm?uid=' + cookies.get('uid') + '&gid=' + gid)
+        .then((res) => {
+            this.setState({
+                ...this.state,
+                messages: (append) ? this.state.messages.push(...res.data.messages) : res.data.messages,
+            })
+        }).catch((err) => {
+            console.error(err);
+            message.error('Error getting unread messages')
         });
     }
     
@@ -172,14 +180,16 @@ class ChatPage extends Component {
     }
 
     // Create new group
-    createGroup = () => {
+    createGroup = (name) => {
         axios.post(ip.loadBalancer + '/creategroup', {
             uid: cookies.get('uid'),
-            gname: this.state.newGroupName, // TODO: Create this state
+            gname: name
         }).then((res) => {
-            
+            this.getJoinedGroups();
+            console.log(res);
         }).catch((err) => {
             console.error(err);
+            message.error('Error creating group')
         });
     };
 
@@ -198,9 +208,9 @@ class ChatPage extends Component {
             gid: this.state.selected
         }).then((res) => {
             console.log(res);
-            // TODO: ???
         }).catch((err) => {
             console.error(err);
+            message.error('Error sending message')
         });
     }
 
@@ -214,11 +224,8 @@ class ChatPage extends Component {
     }
 
     handleMenuSelect = (e) => {
-        this.setState({
-            ...this.state,
-            selected: e.key,
-        })
-        // TODO: Change chat content / Show join dialog
+        // TODO: Is name == gid ?
+        this.selectGroup(e.key);
     }
 
     handleLogOut = () => {
@@ -229,8 +236,8 @@ class ChatPage extends Component {
     }
 
     handleSendMessage = (msg) => {
-        // TODO: Send Message
-        console.log(msg)
+        // Send Message
+        this.sendMessage(msg);
     }
 
     handleCreateGroup = () => {
@@ -243,13 +250,12 @@ class ChatPage extends Component {
 
     handleCreateGroupSubmit = () => {
         if (this.state.createName !== '') {
-            const gid = this.state.createName;
-            // TODO: Create new group with gid
+            const gname = this.state.createName;
+            this.createGroup(gname);
         }
         else {
             message.error('Group name cannot be empty')
         }
-        
     }
 
     render() {
@@ -265,7 +271,7 @@ class ChatPage extends Component {
 
                 <ChatContent
                 messages={this.state.messages}
-                clientID={this.state.clientID}
+                clientID={cookies.get('uid')}
                 handleSendMessage={this.handleSendMessage}
                 selected={this.state.selected}
                 />
