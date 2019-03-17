@@ -1,106 +1,62 @@
 import React, { Component } from 'react';
 import { Layout } from 'antd';
+import Cookies from 'universal-cookie';
 import 'antd/dist/antd.css';
 import './ChatPage.css';
 import axios from 'axios';
 import io from 'socket.io-client';
+import ip from '../ip';
 
 import ChatSider from './Component/ChatSider';
 import ChatContent from './Component/ChatContent';
 
+const cookies = new Cookies();
+
 class ChatPage extends Component {
+
     socket = io(); //ip
-     state = {
-        isJoin : [],
-        message: '',
-        messages: [],
-        lastMessage: {
 
-        },
-        unread: {
-
-        },
-        username: {
-
-        },
-        groupList: [],
-        joinedGroups: [],
-       // isShowingModal: false,
-        newGroupName: '',
-        selectedGroupID: '',
-        selectGroupName: '', 
-        messageOrder: -1,
-    };
-    componentDidMount(){
-         axios.get(/*IpList.loadBalancer */+ '/getm').then((res) => {
-            
-            this.setState({messageOrder: res.data.messageOrder}, () => {
-
-                this.socket.on('chat', (result) => {
-
-                    if (this.state.messageOrder + 1 == result.messageOrder) {
-
-                        this.setState({
-                            messageOrder: result.messageOrder
-                        });
-
-                        let messages = this.state.messages.slice();
-                        let lastMessage = this.state.lastMessage;
-                        //  message = { ...message, user: { uid: message.uid , username:message.user.name} };
-                        messages.push({ ...result.message,
-                            user: {
-                                uid: result.message.uid,
-                                username: result.message.username,
-                                time : result.message.timeStamp
-                            }
-                        });
-                        lastMessage[result.message.gid] = result.message.content;
-                        this.setState({
-                            messages,
-                            lastMessage
-                        });
-
-                        if (this.state.selectedGroupID == result.message.gid) {
-                            axios.post(IpList.loadBalancer + '/setReadAt', {
-                                uid: cookies.get('uid'),
-                                gid: result.message.gid
-
-                            }).then(() => {
-
-                                this.getUnread(result.message.gid);
-                            });
-                        }
-
-                        this.getUnread(result.message.gid);
-                        this.getJoinedGroups();
-                    } else {
-                        this.getAllGroup();
-                        this.getJoinedGroups();
-                    }
-                });
-            });
-        });
-
-        this.getAllGroup();
-        this.getJoinedGroups();
-
-        const node = this.refs.trackerRef;  //scroll to bottom
-        node && node.scrollIntoView({block: "end"})
-
+    constructor(props) {
+        super(props);
+        this.state = {
+            joinedList: ['Group A', 'Group B', 'Group C', 'Group D'],
+            allList: ['Group A', 'Group B', 'Group C', 'Group D', 'Group E', 'Group F', 'Group G'],
+            selected: 'jGroup A',
+            settingVisible: false,
+            clientID: 'Max',
+            selectedGroup: 'Group A',
+            messages: [
+                {message: 'Hi! How are you?', timestamp: '23.30 PM', clientID: 'Sun'},
+                {message: 'I\'m fine. Thanks!', timestamp: '23.34 PM', clientID: 'Max'},
+                {message: 'https://github.com/manussawee/dissys_miniproject', timestamp: '23.38 PM', clientID: 'Max'},
+                {message: 'Just copy it!', timestamp: '23.39 PM', clientID: 'Yoss'},
+                {message: 'Why parallel is so easy?', timestamp: '23.39 PM', clientID: 'Jui'},
+                {message: '...', timestamp: '23.39 PM', clientID: 'Tan'},
+            ],
+        }
     }
-    getunreadm = (gid) => { // get Unread message
 
-        axios.get(/*IP???*/ + '/getunreadm?uid=' + gid).then((res) => { //getUnread with group ID and UID
+    componentDidMount = () => {
+        axios.get(ip.loadBalancer + '/getmessageorder').then((res) => {
+
+        });
+    }
+
+    getUnreadMessage = (gid) => { // get Unread message
+
+        axios.get(ip.loadBalancer + '/getunreadm?uid=' + gid).then((res) => { //getUnread with group ID and UID
             let unread = this.state.unread;
             
             unread[gid] = res.data.messages.length;
             this.setState({
-                unread
+                ...this.state,
+                messages: []
             });
         })
     }
+
     getJoinedGroups = () => { // get Group which User joined
-        axios.get(/*IP???*/+ `/getuserinformation?uid=${cookies.get('uid')}`).then((res) => {
+        axios.get(ip.loadBalancer + `/getuserinformation?uid=${cookies.get('uid')}`).then((res) => {
 
             const myData = res.data.groups.length ? [...res.data.groups].sort((x, y) => x.name.localeCompare(y.name) ) : [];
             this.setState({
@@ -108,8 +64,9 @@ class ChatPage extends Component {
             });
         });
     }
+
     getAllgroup = () => { //get All group in chat server
-         axios.get(/*IP???*/  + '/getAllGroup').then(function (response) {
+         axios.get(ip.loadBalancer  + '/getAllGroup').then(function (response) {
             this.setState({ groupList: response.data }, this.getMessage)
 
         }.bind(this)).catch(function (err) {
@@ -118,20 +75,20 @@ class ChatPage extends Component {
     }
 
     selectGroup = (gid, gname) => { // user selecte group to read message
-  //      const GID = gid;
+        // const GID = gid;
         this.setState({
             selectedGroupID: gid,
             selectGroupName: gname
         });
 
-        axios.post(/*IP???*/  + '/joingroup', {
+        axios.post(ip.loadBalancer  + '/joingroup', {
             uid: cookies.get('uid'),
             gid: gid 
         }).then(function (response) {
            
             this.getJoinedGroups();
 
-            axios.post(/*IP???*/  + '/setread', {
+            axios.post(ip.loadBalancer  + '/setread', {
                 uid: cookies.get('uid'),
                 gid: gid
             }).then(() => {
@@ -141,7 +98,7 @@ class ChatPage extends Component {
             });
         }.bind(this)).catch(function (err) {
             console.error(err);
-            axios.post(/*IP???*/ + '/setread', {
+            axios.post(ip.loadBalancer + '/setread', {
                 uid: cookies.get('uid'),
                 gid: gid
             }).then(() => {
@@ -151,13 +108,13 @@ class ChatPage extends Component {
         });
     }
     
-     getMessage = async () => {
+    getMessage = async () => {
         let messages = this.state.messages;
         await this.state.groupList.map((group) => {
 
-            axios.get(/*IP???*/+ '/viewunreadm?uid=' + cookies.get('uid') + '&gid=' + group._id).then((res) => {
+            axios.get(ip.loadBalancer + '/viewunreadm?uid=' + cookies.get('uid') + '&gid=' + group._id).then((res) => {
 
-                axios.get(/*IP???*/ + '/getm', { params: { gid: group._id } }).then(function (response) {
+                axios.get(ip.loadBalancer + '/getm', { params: { gid: group._id } }).then(function (response) {
 
                     response.data.messages.map((message) => {
 
@@ -181,7 +138,7 @@ class ChatPage extends Component {
         this.setState({ messages });
     }
     leaveGroup = (gid) => {
-        axios.post(/*IP???*/ + '/exitgroup', {
+        axios.post(ip.loadBalancer + '/exitgroup', {
             uid: cookies.get('uid'),
             gid: gid,
         }).then((result) => {
@@ -194,7 +151,7 @@ class ChatPage extends Component {
     }
 
     createGroup = () => {
-        axios.post(/*IP???*/ + '/creategroup', {
+        axios.post(ip.loadBalancer + '/creategroup', {
             uid: cookies.get('uid'),
             gname: this.state.newGroupName,
         }).then(function (response) {
@@ -204,7 +161,7 @@ class ChatPage extends Component {
         });
     };
 
-     sendMessage = () => {
+    sendMessage = () => {
         // scroller.scrollTo('Message', {
         //     duration: 1500,
         //     delay: 100,
@@ -212,7 +169,7 @@ class ChatPage extends Component {
         //     containerId: this.state.messages.length-1,
         //     offset: 50, // Scrolls to element + 50 pixels down the page
         //   });
-        axios.post(/*IP???*/+ '/sendm', {
+        axios.post(ip.loadBalancer+ '/sendm', {
             message: this.state.text ,
             uid: cookies.get('uid'),
             gid: this.state.selectedGroupID // CHANGE gid MANUALLY
@@ -223,26 +180,6 @@ class ChatPage extends Component {
         });
 
         this.setState({ text: '' });   
-    }
-
-    constructor(props) {
-        super(props);
-        this.state = {
-            joinedList: ['Group A', 'Group B', 'Group C', 'Group D'],
-            allList: ['Group A', 'Group B', 'Group C', 'Group D', 'Group E', 'Group F', 'Group G'],
-            selected: 'jGroup A',
-            settingVisible: false,
-            clientID: 'Max',
-            selectedGroup: 'Group A',
-            messages: [
-                {message: 'Hi! How are you?', timestamp: '23.30 PM', clientID: 'Sun'},
-                {message: 'I\'m fine. Thanks!', timestamp: '23.34 PM', clientID: 'Max'},
-                {message: 'https://github.com/manussawee/dissys_miniproject', timestamp: '23.38 PM', clientID: 'Max'},
-                {message: 'Just copy it!', timestamp: '23.39 PM', clientID: 'Yoss'},
-                {message: 'Why parallel is so easy?', timestamp: '23.39 PM', clientID: 'Jui'},
-                {message: '...', timestamp: '23.39 PM', clientID: 'Tan'},
-            ],
-        }
     }
 
     handlePopOverChange = (visible) => {
