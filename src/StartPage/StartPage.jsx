@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import { Button, Input } from 'antd';
 import "antd/dist/antd.css";
 import './StartPage.css';
+import axios from 'axios';
+import io from 'socket.io-client';
 
 class StartPage extends Component {
 
