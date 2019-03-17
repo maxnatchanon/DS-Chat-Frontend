@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Layout } from 'antd';
+import { Layout, message } from 'antd';
 import Cookies from 'universal-cookie';
 import 'antd/dist/antd.css';
 import './ChatPage.css';
@@ -12,223 +12,8 @@ import ChatContent from './Component/ChatContent';
 
 const cookies = new Cookies();
 class ChatPage extends Component {
-    socket = io(); //ip
-     state = {
-        isJoin : [],
-        message: '',
-        messages: [],
-        lastMessage: {
 
-        },
-        unread: {
-
-        },
-        username: {
-
-        },
-        groupList: [],
-        joinedGroups: [],
-       // isShowingModal: false,
-        newGroupName: '',
-        selectedGroupID: '',
-        selectGroupName: '', 
-        messageOrder: -1,
-    };
-    componentDidMount(){
-         axios.get(/*IpList.loadBalancer */+ '/getm').then((res) => {
-            
-            this.setState({messageOrder: res.data.messageOrder}, () => {
-
-                this.socket.on('chat', (result) => {
-
-                    if (this.state.messageOrder + 1 == result.messageOrder) {
-
-                        this.setState({
-                            messageOrder: result.messageOrder
-                        });
-
-                        let messages = this.state.messages.slice();
-                        let lastMessage = this.state.lastMessage;
-                        //  message = { ...message, user: { uid: message.uid , username:message.user.name} };
-                        messages.push({ ...result.message,
-                            user: {
-                                uid: result.message.uid,
-                                username: result.message.username,
-                                time : result.message.timeStamp
-                            }
-                        });
-                        lastMessage[result.message.gid] = result.message.content;
-                        this.setState({
-                            messages,
-                            lastMessage
-                        });
-
-                        if (this.state.selectedGroupID == result.message.gid) {
-                            axios.post(IpList.loadBalancer + '/setReadAt', {
-                                uid: cookies.get('uid'),
-                                gid: result.message.gid
-
-                            }).then(() => {
-
-                                this.getUnread(result.message.gid);
-                            });
-                        }
-
-                        this.getUnread(result.message.gid);
-                        this.getJoinedGroups();
-                    } else {
-                        this.getAllGroup();
-                        this.getJoinedGroups();
-                    }
-                });
-            });
-        });
-
-        this.getAllGroup();
-        this.getJoinedGroups();
-
-        const node = this.refs.trackerRef;  //scroll to bottom
-        node && node.scrollIntoView({block: "end"})
-
-    }
-    getunreadm = (gid) => { // get Unread message
-
-        axios.get(/*IP???*/ + '/getunreadm?uid=' + gid).then((res) => { //getUnread with group ID and UID
-            let unread = this.state.unread;
-            
-            unread[gid] = res.data.messages.length;
-            this.setState({
-                unread
-            });
-        })
-    }
-    getJoinedGroups = () => { // get Group which User joined
-        axios.get(/*IP???*/+ `/getuserinformation?uid=${cookies.get('uid')}`).then((res) => {
-
-            const myData = res.data.groups.length ? [...res.data.groups].sort((x, y) => x.name.localeCompare(y.name) ) : [];
-            this.setState({
-                joinedGroups: myData
-            });
-        });
-    }
-    getAllgroup = () => { //get All group in chat server
-         axios.get(/*IP???*/  + '/getAllGroup').then(function (response) {
-            this.setState({ groupList: response.data }, this.getMessage)
-
-        }.bind(this)).catch(function (err) {
-            console.error(err);
-        });
-    }
-
-    selectGroup = (gid, gname) => { // user selecte group to read message
-  //      const GID = gid;
-        this.setState({
-            selectedGroupID: gid,
-            selectGroupName: gname
-        });
-
-        axios.post(/*IP???*/  + '/joingroup', {
-            uid: cookies.get('uid'),
-            gid: gid 
-        }).then(function (response) {
-           
-            this.getJoinedGroups();
-
-            axios.post(/*IP???*/  + '/setread', {
-                uid: cookies.get('uid'),
-                gid: gid
-            }).then(() => {
-
-                this.getunreadm(gid);
-
-            });
-        }.bind(this)).catch(function (err) {
-            console.error(err);
-            axios.post(/*IP???*/ + '/setread', {
-                uid: cookies.get('uid'),
-                gid: gid
-            }).then(() => {
-
-                this.getunreadm(gid);
-            });
-        });
-    }
-    
-     getMessage = async () => {
-        let messages = this.state.messages;
-        await this.state.groupList.map((group) => {
-
-            axios.get(/*IP???*/+ '/viewunreadm?uid=' + cookies.get('uid') + '&gid=' + group._id).then((res) => {
-
-                axios.get(/*IP???*/ + '/getm', { params: { gid: group._id } }).then(function (response) {
-
-                    response.data.messages.map((message) => {
-
-                        message = { ...message, user: { uid: message.uid , username:message.username,time 
-                        : message.timeStamp} };
-                        messages.push(message);
-                    })
-                    let lastMessage = this.state.lastMessage;
-                    let unread = this.state.unread;
-
-                    unread[group._id] = res.data.messages.length;
-                    lastMessage[group._id] = response.data.messages[response.data.messages.length - 1].content;
-
-                    this.setState({ lastMessage, unread });
-                }.bind(this)).catch(function (err) {
-                    console.error(err);
-                });
-            }, (err) => { console.error(err)});
-        })
-
-        this.setState({ messages });
-    }
-    leaveGroup = (gid) => {
-        axios.post(/*IP???*/ + '/exitgroup', {
-            uid: cookies.get('uid'),
-            gid: gid,
-        }).then((result) => {
-            this.getJoinedGroups();
-            this.setState({
-                selectedGroupID: '',
-                selectGroupName: '',
-            });
-        });
-    }
-
-    createGroup = () => {
-        axios.post(/*IP???*/ + '/creategroup', {
-            uid: cookies.get('uid'),
-            gname: this.state.newGroupName,
-        }).then(function (response) {
-            
-        }).catch(function (err) {
-            console.error(err);
-        });
-    };
-
-     sendMessage = () => {
-        // scroller.scrollTo('Message', {
-        //     duration: 1500,
-        //     delay: 100,
-        //     smooth: true,
-        //     containerId: this.state.messages.length-1,
-        //     offset: 50, // Scrolls to element + 50 pixels down the page
-        //   });
-        axios.post(/*IP???*/+ '/sendm', {
-            message: this.state.text ,
-            uid: cookies.get('uid'),
-            gid: this.state.selectedGroupID // CHANGE gid MANUALLY
-        }).then(function (response) {
-
-        }).catch(function (err) {
-            console.error(err);
-        });
-
-        this.setState({ text: '' });   
-    }
-
-    socket = io(); //ip
+    socket = io();
 
     constructor(props) {
         super(props);
@@ -250,90 +35,95 @@ class ChatPage extends Component {
         }
     }
 
-    componentDidMount = () => {
-        axios.get(ip.loadBalancer + '/getmessageorder').then((res) => {
+    componentDidMount(){
+        // TODO: Get joined group -> joinedList
+        // TODO: Get all group -> joinGroup
+    }
 
+    // Get unread messages with uid and gid
+    getUnreadMessage = (gid) => {
+        axios.get(ip.loadBalancer + '/getunreadm?uid=' + cookies.get('uid') + '&gid=' + gid)
+        .then((res) => {
+            // TODO: Set messages to response messages
         });
     }
 
-    getUnreadMessage = (gid) => { // get Unread message
-
-        axios.get(ip.loadBalancer + '/getunreadm?uid=' + gid).then((res) => { //getUnread with group ID and UID
-            let unread = this.state.unread;
-            
-            unread[gid] = res.data.messages.length;
+    // Get joined groups -> joinedList
+    getJoinedGroups = () => { 
+        axios.get(ip.loadBalancer + `/getuserinformation?uid=${cookies.get('uid')}`)
+        .then((res) => {
+            // const myData = res.data.groups.length ? [...res.data.groups].sort((x, y) => x.name.localeCompare(y.name) ) : [];
             this.setState({
                 ...this.state,
-                messages: []
-            });
-        })
-    }
-
-    getJoinedGroups = () => { // get Group which User joined
-        axios.get(ip.loadBalancer + `/getuserinformation?uid=${cookies.get('uid')}`).then((res) => {
-
-            const myData = res.data.groups.length ? [...res.data.groups].sort((x, y) => x.name.localeCompare(y.name) ) : [];
-            this.setState({
-                joinedGroups: myData
+                joinedList: res.data.groups,
             });
         });
     }
 
-    getAllgroup = () => { //get All group in chat server
-         axios.get(ip.loadBalancer  + '/getAllGroup').then(function (response) {
-            this.setState({ groupList: response.data }, this.getMessage)
-
-        }.bind(this)).catch(function (err) {
+    // Get all groups -> allList
+    getAllgroup = () => {
+        axios.get(ip.loadBalancer  + '/getAllGroup')
+        .then(function (res) {
+            this.setState({
+                ...this.state,
+                allList: res.data,
+            })
+        }).catch((err) => {
             console.error(err);
         });
     }
 
-    selectGroup = (gid, gname) => { // user selecte group to read message
-        // const GID = gid;
+    // Select group from sider
+    selectGroup = (gid) => {
         this.setState({
-            selectedGroupID: gid,
-            selectGroupName: gname
+            ...this.state,
+            selected: gid,
         });
 
+        // Join group
         axios.post(ip.loadBalancer  + '/joingroup', {
             uid: cookies.get('uid'),
             gid: gid 
-        }).then(function (response) {
-           
+        }).then((res) => {
+            // Refresh joined group
             this.getJoinedGroups();
-
+            // Set read message
             axios.post(ip.loadBalancer  + '/setread', {
                 uid: cookies.get('uid'),
                 gid: gid
             }).then(() => {
-
-                this.getunreadm(gid);
-
+                this.getUnreadMessage(gid);
             });
-        }.bind(this)).catch(function (err) {
+        }).catch((err) => {
+            message.error('Join group error')
             console.error(err);
             axios.post(ip.loadBalancer + '/setread', {
                 uid: cookies.get('uid'),
                 gid: gid
             }).then(() => {
-
-                this.getunreadm(gid);
+                this.getUnreadMessage(gid);
             });
         });
     }
     
+    // TODO: ???
     getMessage = async () => {
         let messages = this.state.messages;
         await this.state.groupList.map((group) => {
 
-            axios.get(ip.loadBalancer + '/viewunreadm?uid=' + cookies.get('uid') + '&gid=' + group._id).then((res) => {
+            axios.get(ip.loadBalancer+ '/viewunreadm?uid=' + cookies.get('uid') + '&gid=' + group._id).then((res) => {
 
                 axios.get(ip.loadBalancer + '/getm', { params: { gid: group._id } }).then(function (response) {
 
                     response.data.messages.map((message) => {
-
-                        message = { ...message, user: { uid: message.uid , username:message.username,time 
-                        : message.timeStamp} };
+                        message = {
+                            ...message,
+                            user: {
+                                uid: message.uid,
+                                username:message.username,
+                                time: message.timeStamp
+                            }
+                        };
                         messages.push(message);
                     })
                     let lastMessage = this.state.lastMessage;
@@ -346,35 +136,51 @@ class ChatPage extends Component {
                 }.bind(this)).catch(function (err) {
                     console.error(err);
                 });
-            }, (err) => { console.error(err)});
+            }).catch((err) => {
+                console.error(err);
+            });
         })
 
         this.setState({ messages });
     }
-    leaveGroup = (gid) => {
+
+    // Exit group
+    exitGroup = (gid) => {
         axios.post(ip.loadBalancer + '/exitgroup', {
             uid: cookies.get('uid'),
             gid: gid,
-        }).then((result) => {
+        }).then((res) => {
             this.getJoinedGroups();
             this.setState({
-                selectedGroupID: '',
-                selectGroupName: '',
+                ...this.state,
+                selected: '',
             });
         });
     }
 
+    // Leave group
+    leaveGroup = (gid) => {
+        axios.post(ip.loadBalancer + '/leavegroup', {
+            uid: cookies.get('uid'),
+            gid: gid,
+        }).then((res) => {
+            // TODO: Do something
+        });
+    }
+
+    // Create new group
     createGroup = () => {
         axios.post(ip.loadBalancer + '/creategroup', {
             uid: cookies.get('uid'),
-            gname: this.state.newGroupName,
-        }).then(function (response) {
+            gname: this.state.newGroupName, // TODO: Create this state
+        }).then((res) => {
             
-        }).catch(function (err) {
+        }).catch((err) => {
             console.error(err);
         });
     };
 
+    // Send new message
     sendMessage = () => {
         // scroller.scrollTo('Message', {
         //     duration: 1500,
@@ -383,18 +189,33 @@ class ChatPage extends Component {
         //     containerId: this.state.messages.length-1,
         //     offset: 50, // Scrolls to element + 50 pixels down the page
         //   });
-        axios.post(ip.loadBalancer+ '/sendm', {
-            message: this.state.text ,
+        axios.post(ip.loadBalancer + '/sendm', {
+            message: this.state.text, // TODO: Create this state
             uid: cookies.get('uid'),
-            gid: this.state.selectedGroupID // CHANGE gid MANUALLY
-        }).then(function (response) {
+            gid: this.state.selected
+        }).then((res) => {
 
-        }).catch(function (err) {
+        }).catch((err) => {
             console.error(err);
         });
 
-        this.setState({ text: '' });   
+        this.setState({ text: '' }); // TODO: Clear state 
     }
+
+    // Get unread message
+    getUnreadMessage = (gid) => {
+        axios.get(ip.loadBalancer + '/getunreadm?uid=' + gid).then((res) => { //getUnread with group ID and UID
+            let unread = this.state.unread;
+            
+            unread[gid] = res.data.messages.length;
+            this.setState({
+                ...this.state,
+                messages: []
+            });
+        })
+    }
+
+    // ====================================================
 
     handlePopOverChange = (visible) => {
         this.setState({

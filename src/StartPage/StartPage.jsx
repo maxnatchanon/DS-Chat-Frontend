@@ -1,9 +1,12 @@
 import React, { Component } from "react";
-import { Button, Input } from 'antd';
+import { Button, Input, message } from 'antd';
+import Cookies from 'universal-cookie';
 import "antd/dist/antd.css";
 import './StartPage.css';
 import axios from 'axios';
-import io from 'socket.io-client';
+import ip from '../ip';
+
+const cookies = new Cookies();
 
 class StartPage extends Component {
 
@@ -22,7 +25,18 @@ class StartPage extends Component {
     }
 
     handleLogIn = () => {
-        // TODO: Log in and go to chat page
+        axios.post(ip.loadBalancer + '/register', { name: this.state.username })
+        .then(function (response) {
+            console.log(response);
+            cookies.set('isAuthen', 'true', { path: '/', maxAge: 60 * 60 * 24 });
+            cookies.set('username', this.state.username, { path: '/', maxAge: 60 * 60 * 24 });
+            cookies.set('uid', response.data.uid, { path: '/', maxAge: 60 * 60 * 24 });
+            window.location = '/chat';
+        })
+        .catch(function (err) {
+            message.error('Login error');
+            console.error(err);
+        });
     }
 
     render() {
