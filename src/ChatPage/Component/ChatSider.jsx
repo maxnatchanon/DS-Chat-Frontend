@@ -11,7 +11,7 @@ export default class ChatSider extends Component {
             <Sider className='sider'>
                 <div className='chat-header'>
                     <Popover
-                    content={<a href='logout' onClick={this.props.handleLogOut}>Log Out</a>}
+                    content={<a href='/' onClick={this.props.handleLogOut}>Log Out</a>}
                     trigger='click'
                     placement='bottomLeft'
                     visible={this.props.state.settingVisible}

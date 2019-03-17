@@ -35,7 +35,7 @@ export default class ChatContent extends Component {
         return (
             <Content className='chat-content-container'>
                 <div className='chat-content-header center-child'>
-                    { this.props.selectedGroup }
+                    { this.props.selected.slice(1, this.props.selected.length) }
                 </div>
                 <div className='chat-content-divider'><Divider/></div>
                 <div className='chat-message-container'>

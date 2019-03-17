@@ -25,7 +25,6 @@ class ChatPage extends Component {
             createVisible: false,
             createName: '',
             clientID: 'Max',
-            selectedGroup: 'Group A',
             messages: [
                 {message: 'Hi! How are you?', timestamp: '23.30 PM', clientID: 'Sun'},
                 {message: 'I\'m fine. Thanks!', timestamp: '23.34 PM', clientID: 'Max'},
@@ -38,15 +37,20 @@ class ChatPage extends Component {
     }
 
     componentDidMount(){
-        // TODO: Get joined group -> joinedList
-        // TODO: Get all group -> joinGroup
+        // Get joined group -> joinedList
+        this.getJoinedGroups();
+        // Get all group -> joinGroup
+        this.getAllgroup();
     }
 
     // Get unread messages with uid and gid
     getUnreadMessage = (gid) => {
-        axios.get(ip.loadBalancer + '/getunreadm?uid=' + cookies.get('uid') + '&gid=' + gid)
+        axios.get(ip.loadBalancer + '/viewunreadm?uid=' + cookies.get('uid') + '&gid=' + gid)
         .then((res) => {
-            // TODO: Set messages to response messages
+            this.setState({
+                ...this.state,
+                messages: res.data.messages,
+            })
         });
     }
 
@@ -54,17 +58,17 @@ class ChatPage extends Component {
     getJoinedGroups = () => { 
         axios.get(ip.loadBalancer + `/getuserinformation?uid=${cookies.get('uid')}`)
         .then((res) => {
-            // const myData = res.data.groups.length ? [...res.data.groups].sort((x, y) => x.name.localeCompare(y.name) ) : [];
+            const myData = res.data.groups.length ? [...res.data.groups].sort((x, y) => x.name.localeCompare(y.name) ) : [];
             this.setState({
                 ...this.state,
-                joinedList: res.data.groups,
+                joinedList: myData,
             });
         });
     }
 
     // Get all groups -> allList
     getAllgroup = () => {
-        axios.get(ip.loadBalancer  + '/getAllGroup')
+        axios.get(ip.loadBalancer  + '/getgroup')
         .then(function (res) {
             this.setState({
                 ...this.state,
@@ -87,64 +91,55 @@ class ChatPage extends Component {
             uid: cookies.get('uid'),
             gid: gid 
         }).then((res) => {
-            // Refresh joined group
-            this.getJoinedGroups();
-            // Set read message
-            axios.post(ip.loadBalancer  + '/setread', {
-                uid: cookies.get('uid'),
-                gid: gid
-            }).then(() => {
-                this.getUnreadMessage(gid);
-            });
+            if (res.data === 'Already joined' || res.data === 'Joined') {
+                // TODO: Get unread message -> messages
+            }
+            else {
+                message.error(res.body);
+            }
         }).catch((err) => {
             message.error('Join group error')
             console.error(err);
-            axios.post(ip.loadBalancer + '/setread', {
-                uid: cookies.get('uid'),
-                gid: gid
-            }).then(() => {
-                this.getUnreadMessage(gid);
-            });
         });
     }
     
     // TODO: ???
-    getMessage = async () => {
-        let messages = this.state.messages;
-        await this.state.groupList.map((group) => {
+    // getMessage = async () => {
+    //     let messages = this.state.messages;
+    //     await this.state.groupList.map((group) => {
 
-            axios.get(ip.loadBalancer+ '/viewunreadm?uid=' + cookies.get('uid') + '&gid=' + group._id).then((res) => {
+    //         axios.get(ip.loadBalancer+ '/viewunreadm?uid=' + cookies.get('uid') + '&gid=' + group._id).then((res) => {
 
-                axios.get(ip.loadBalancer + '/getm', { params: { gid: group._id } }).then(function (response) {
+    //             axios.get(ip.loadBalancer + '/getm', { params: { gid: group._id } }).then(function (response) {
 
-                    response.data.messages.map((message) => {
-                        message = {
-                            ...message,
-                            user: {
-                                uid: message.uid,
-                                username:message.username,
-                                time: message.timeStamp
-                            }
-                        };
-                        messages.push(message);
-                    })
-                    let lastMessage = this.state.lastMessage;
-                    let unread = this.state.unread;
+    //                 response.data.messages.map((message) => {
+    //                     message = {
+    //                         ...message,
+    //                         user: {
+    //                             uid: message.uid,
+    //                             username:message.username,
+    //                             time: message.timeStamp
+    //                         }
+    //                     };
+    //                     messages.push(message);
+    //                 })
+    //                 let lastMessage = this.state.lastMessage;
+    //                 let unread = this.state.unread;
 
-                    unread[group._id] = res.data.messages.length;
-                    lastMessage[group._id] = response.data.messages[response.data.messages.length - 1].content;
+    //                 unread[group._id] = res.data.messages.length;
+    //                 lastMessage[group._id] = response.data.messages[response.data.messages.length - 1].content;
 
-                    this.setState({ lastMessage, unread });
-                }.bind(this)).catch(function (err) {
-                    console.error(err);
-                });
-            }).catch((err) => {
-                console.error(err);
-            });
-        })
+    //                 this.setState({ lastMessage, unread });
+    //             }.bind(this)).catch(function (err) {
+    //                 console.error(err);
+    //             });
+    //         }).catch((err) => {
+    //             console.error(err);
+    //         });
+    //     })
 
-        this.setState({ messages });
-    }
+    //     this.setState({ messages });
+    // }
 
     // Exit group
     exitGroup = (gid) => {
@@ -156,6 +151,7 @@ class ChatPage extends Component {
             this.setState({
                 ...this.state,
                 selected: '',
+                messages: [],
             });
         });
     }
@@ -166,7 +162,12 @@ class ChatPage extends Component {
             uid: cookies.get('uid'),
             gid: gid,
         }).then((res) => {
-            // TODO: Do something
+            this.getJoinedGroups();
+            this.setState({
+                ...this.state,
+                selected: '',
+                messages: [],
+            });
         });
     }
 
@@ -183,7 +184,7 @@ class ChatPage extends Component {
     };
 
     // Send new message
-    sendMessage = () => {
+    sendMessage = (msg) => {
         // scroller.scrollTo('Message', {
         //     duration: 1500,
         //     delay: 100,
@@ -192,29 +193,15 @@ class ChatPage extends Component {
         //     offset: 50, // Scrolls to element + 50 pixels down the page
         //   });
         axios.post(ip.loadBalancer + '/sendm', {
-            message: this.state.text, // TODO: Create this state
+            content: msg,
             uid: cookies.get('uid'),
             gid: this.state.selected
         }).then((res) => {
-
+            console.log(res);
+            // TODO: ???
         }).catch((err) => {
             console.error(err);
         });
-
-        this.setState({ text: '' }); // TODO: Clear state 
-    }
-
-    // Get unread message
-    getUnreadMessage = (gid) => {
-        axios.get(ip.loadBalancer + '/getunreadm?uid=' + gid).then((res) => { //getUnread with group ID and UID
-            let unread = this.state.unread;
-            
-            unread[gid] = res.data.messages.length;
-            this.setState({
-                ...this.state,
-                messages: []
-            });
-        })
     }
 
     // ====================================================
@@ -235,7 +222,10 @@ class ChatPage extends Component {
     }
 
     handleLogOut = () => {
-        // TODO: Log out
+        cookies.remove('isAuthen');
+        cookies.remove('username');
+        cookies.remove('uid');
+        window.location = '/';
     }
 
     handleSendMessage = (msg) => {
@@ -277,7 +267,7 @@ class ChatPage extends Component {
                 messages={this.state.messages}
                 clientID={this.state.clientID}
                 handleSendMessage={this.handleSendMessage}
-                selectedGroup={this.state.selectedGroup}
+                selected={this.state.selected}
                 />
 
                 <Modal

@@ -21,19 +21,17 @@ class StartPage extends Component {
         this.setState({
             username: e.target.value,
         });
-        console.log(this.state.username)
     }
 
     handleLogIn = () => {
         axios.post(ip.loadBalancer + '/register', { name: this.state.username })
-        .then(function (response) {
-            console.log(response);
+        .then((res) => {
             cookies.set('isAuthen', 'true', { path: '/', maxAge: 60 * 60 * 24 });
             cookies.set('username', this.state.username, { path: '/', maxAge: 60 * 60 * 24 });
-            cookies.set('uid', response.data.uid, { path: '/', maxAge: 60 * 60 * 24 });
+            cookies.set('uid', res.data.uid, { path: '/', maxAge: 60 * 60 * 24 });
             window.location = '/chat';
         })
-        .catch(function (err) {
+        .catch((err) => {
             message.error('Login error');
             console.error(err);
         });
