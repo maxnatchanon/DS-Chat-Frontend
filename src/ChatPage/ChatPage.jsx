@@ -41,8 +41,11 @@ class ChatPage extends Component {
         this.socket.emit('connection', {content: 'HI'});
         this.socket.on('chat', (res) => {
             var messages = this.state.messages;
+            messages.push(res.message);
             console.log(res.message.gid, this.state.selectedGid)
             if (res.message.gid === this.state.selectedGid) {
+                console.log(messages)
+                
                 this.setState({
                     ...this.state,
                     messages: messages,
@@ -128,8 +131,8 @@ class ChatPage extends Component {
             else {
                 message.error('Error joining group');
             }
-            this.getAllgroup();
-            this.getJoinedGroups();
+            // this.getAllgroup();
+            // this.getJoinedGroups();
         }).catch((err) => {
             message.error('Error joining group')
             console.error(err);
@@ -286,45 +289,6 @@ class ChatPage extends Component {
             message.error('Error sending message')
         });
     };
-
-
-    // TODO: ???
-    // getMessage = async () => {
-    //     let messages = this.state.messages;
-    //     await this.state.groupList.map((group) => {
-
-    //         axios.get(ip.loadBalancer+ '/viewunreadm?uid=' + cookies.get('uid') + '&gid=' + group._id).then((res) => {
-
-    //             axios.get(ip.loadBalancer + '/getm', { params: { gid: group._id } }).then(function (response) {
-
-    //                 response.data.messages.map((message) => {
-    //                     message = {
-    //                         ...message,
-    //                         user: {
-    //                             uid: message.uid,
-    //                             username:message.username,
-    //                             time: message.timeStamp
-    //                         }
-    //                     };
-    //                     messages.push(message);
-    //                 })
-    //                 let lastMessage = this.state.lastMessage;
-    //                 let unread = this.state.unread;
-
-    //                 unread[group._id] = res.data.messages.length;
-    //                 lastMessage[group._id] = response.data.messages[response.data.messages.length - 1].content;
-
-    //                 this.setState({ lastMessage, unread });
-    //             }.bind(this)).catch(function (err) {
-    //                 console.error(err);
-    //             });
-    //         }).catch((err) => {
-    //             console.error(err);
-    //         });
-    //     })
-
-    //     this.setState({ messages });
-    // }
 
     // ====================================================
 
