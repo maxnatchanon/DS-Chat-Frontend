@@ -36,9 +36,10 @@ export default class ChatContent extends Component {
 
     checkSendable = () => {
         const notSendable = (this.state.inputMessage.trim() === '');
+        const notSelected = (this.props.selectedGroup === '');
         this.setState({
             ...this.state,
-            disableSend: notSendable,
+            disableSend: (notSendable || notSelected),
         });
     }
 
@@ -72,7 +73,7 @@ export default class ChatContent extends Component {
                 <div className='message-input-container'>
                     <Divider className='chat-input-divider'/>
                     <div>
-                        <Input id='message-input' onChange={this.handleInputChange} value={this.state.inputMessage}></Input>
+                        <Input id='message-input' disabled={this.props.selectedGroup === ''} onChange={this.handleInputChange} value={this.state.inputMessage}></Input>
                         <Button 
                         disabled={this.state.disableSend}
                         onClick={(e)=>{
