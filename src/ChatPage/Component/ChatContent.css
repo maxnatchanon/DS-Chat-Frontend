@@ -1,0 +1,129 @@
+.chat-content-container {
+    background-color: var(--light-bg-color);
+}
+
+.chat-content-header {
+    color: var(--dark-text-color);
+    height: 60px;
+    font-size: 1.7em;
+}
+
+.chat-content-divider {
+    padding: 0 10px;
+}
+
+.chat-input-divider {
+    margin: 0;
+}
+
+.chat-content-divider > * {
+    margin: 0;
+    background-color: #d6d6d6;
+}
+
+.chat-message-container {
+    width: 100%;
+    height: calc(100% - 112px);
+    overflow-y: scroll;
+    padding-bottom: 15px;
+}
+
+.message-container {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 15px 0 15px;
+}
+
+.message-input-container {
+    height: 50px;
+}
+
+.message-input-container > div {
+    display: flex;
+    flex-direction: row;
+}
+
+.message-input-container > * > Input {
+    height: 36px;
+    width: calc(100% - 110px - 14px);
+    margin: 7px;
+}
+
+.message-input-container > * > Button {
+    height: 36px;
+    width: 110px;
+    margin: 7px;
+    background-color: var(--highlight-ops-color);
+    border-color: transparent;
+    color: white;
+    font-size: 1.2em;
+    font-weight: 500;
+}
+
+.message-input-container > * > Button:hover,
+.message-input-container > * > Button:focus {
+    background-color: var(--highlight-ops-color);
+    color: white;
+    opacity: 0.8;
+    box-shadow: none;
+    border-color: transparent;
+}
+
+/* ================================= */
+
+.sender {
+    font-size: 1.1em;
+    font-weight: 500;
+    margin: 0 4px 2px 4px;
+}
+
+.message {
+    width: fit-content;
+    max-width: 40%;
+    padding: 8px 18px;
+    border-radius: 12px;
+    font-size: 1.1em;
+    word-wrap: break-word;
+    text-align: left;
+}
+
+.timestamp {
+    margin: 0 8px;
+    font-size: 0.85em;
+    color: #888888;
+}
+
+.message-left {
+    text-align: -webkit-left;
+}
+
+.message-right {
+    text-align: -webkit-right;
+}
+
+.message-bg-left {
+    background-color: #e0e0e0;
+}
+
+.message-bg-right {
+    background-color: var(--highlight-color);
+    color: white;
+}
+
+.message-time-container-right {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+}
+
+.message-time-container-left {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.leaveButton {
+    position: absolute;
+    right: 20px;
+    color: var('dark-text-color')
+}
