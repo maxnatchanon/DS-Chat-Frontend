@@ -251,7 +251,7 @@ class ChatPage extends Component {
         axios.post(ip.loadBalancer + '/sendm', {
             content: msg,
             uid: cookies.get('uid'),
-            gid: this.state.selectedGroup
+            gid: this.state.selectedGid
         }).then((res) => {
             console.log(res);
         }).catch((err) => {
