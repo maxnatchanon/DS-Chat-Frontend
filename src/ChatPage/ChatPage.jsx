@@ -42,6 +42,7 @@ class ChatPage extends Component {
         this.socket.on('chat', (res) => {
             var messages = this.state.messages;
             messages.push(res.message)
+            console.log(res.message.user)
             this.setState({
                 ...this.state,
                 messages: messages,
