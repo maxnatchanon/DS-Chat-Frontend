@@ -78,6 +78,7 @@ class ChatPage extends Component {
 
     // Select group from sider
     // Join selected group and get unread or all messages
+    // If joining successful, start polling
     // POST /joingroup
     // Parameter: uid, gid
     selectGroup = (gid) => {
@@ -88,20 +89,27 @@ class ChatPage extends Component {
             uid: cookies.get('uid'),
             gid: gid 
         }).then((res) => {
-            this.setState({
-                ...this.state,
-                selectedGroup: gid,
-            });
             if (res.data === 'Already joined') {
                 this.getUnreadMessage(gid, false);
+                this.setState({
+                    ...this.state,
+                    selectedGroup: gid,
+                }, () => {
+                    this.startPolling();
+                });
             }
             else if (res.data === 'Joined') {
                 this.getAllMessage(gid);
+                this.setState({
+                    ...this.state,
+                    selectedGroup: gid,
+                }, () => {
+                    this.startPolling();
+                });
             }
             else {
                 message.error(res.body);
             }
-            this.startPolling();
         }).catch((err) => {
             message.error('Error joining group')
             console.error(err);
