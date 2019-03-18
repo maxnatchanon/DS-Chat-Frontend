@@ -48,15 +48,15 @@ export default class ChatContent extends Component {
             <Content className='chat-content-container'>
                 <div className='chat-content-header center-child'>
                     <span>{ this.props.selectedGroup }</span>
-                    <span className='leaveButton'>
-                    <Popconfirm
-                    placement='bottomRight'
-                    title={'Leave group?'}
-                    onConfirm={this.props.handleLeaveGroup}
-                    okText='Confirm' cancelText='Cancel'
-                    >
-                        <Icon type='logout' />
-                    </Popconfirm>
+                    <span className='leaveButton' style={{visibility: ((this.props.selectedGroup === '') ?  'hidden' : 'visible')}}>
+                        <Popconfirm
+                        placement='bottomRight'
+                        title={'Leave group?'}
+                        onConfirm={this.props.handleLeaveGroup}
+                        okText='Confirm' cancelText='Cancel'
+                        >
+                            <Icon type='logout' />
+                        </Popconfirm>
                     </span>
                 </div>
                 <div className='chat-content-divider'><Divider/></div>

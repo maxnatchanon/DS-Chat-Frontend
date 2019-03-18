@@ -26,7 +26,7 @@ export default class ChatSider extends Component {
                 <Menu
                 theme='dark' mode='inline'
                 defaultOpenKeys={['joinedGroup']}
-                selectedKeys={[this.props.state.selected]}
+                selectedKeys={[this.props.state.selectedKey]}
                 onSelect={this.props.handleMenuSelect}
                 >
                     <SubMenu key='joinedGroup' title={<span><Icon type="check-circle"/>Joined group</span>}>
