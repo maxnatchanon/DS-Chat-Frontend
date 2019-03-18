@@ -4,7 +4,7 @@ import Cookies from 'universal-cookie';
 import 'antd/dist/antd.css';
 import './ChatPage.css';
 import axios from 'axios';
-// import io from 'socket.io-client';
+import io from 'socket.io-client';
 import ip from '../ip';
 
 import ChatSider from './Component/ChatSider';
@@ -13,7 +13,7 @@ import ChatContent from './Component/ChatContent';
 const cookies = new Cookies();
 class ChatPage extends Component {
 
-    // socket = io();
+    socket = io(ip.socketServer);
     pollInterval = null;
 
     constructor(props) {
@@ -22,6 +22,7 @@ class ChatPage extends Component {
             joinedList: [],
             allList: [],
             selectedKey: '',
+            selectedGid: '',
             selectedGroup: '',
             settingVisible: false,
             createVisible: false,
@@ -36,7 +37,19 @@ class ChatPage extends Component {
         // Get all group -> joinGroup
         this.getAllgroup();
         // Load mockup data
-        this.loadMockupData();
+        // this.loadMockupData();
+        this.socket.emit('connection', {content: 'HI'});
+        this.socket.on('chat', (res) => {
+            var messages = this.state.messages;
+            messages.push(res.message)
+            this.setState({
+                ...this.state,
+                messages: messages,
+            }, () => {
+                const lastMsg = document.getElementById('msg-0');
+                lastMsg.scrollIntoView({behavior: 'smooth'});
+            });
+        });
     };
 
     // ====================================================
@@ -48,6 +61,7 @@ class ChatPage extends Component {
     getJoinedGroups = () => { 
         axios.get(ip.loadBalancer + `/getuserinformation?uid=${cookies.get('uid')}`)
         .then((res) => {
+            if (res.data === 'ERROR') throw 'asd';
             const myData = res.data.groups.length ? [...res.data.groups].sort((x, y) => x.name.localeCompare(y.name) ) : [];
             this.setState({
                 ...this.state,
@@ -65,11 +79,12 @@ class ChatPage extends Component {
     // Parameter: -
     getAllgroup = () => {
         axios.get(ip.loadBalancer  + '/getgroup')
-        .then(function (res) {
+        .then((res) => {
+            if (res.data === 'ERROR') throw 'asd';
             this.setState({
                 ...this.state,
                 allList: res.data,
-            })
+            });
         }).catch((err) => {
             console.error(err);
             message.error('Error getting all groups');
@@ -82,29 +97,26 @@ class ChatPage extends Component {
     // POST /joingroup
     // Parameter: uid, gid
     selectGroup = (gid) => {
-        this.stopPolling();
+        // this.stopPolling();
 
         // Join group
         axios.post(ip.loadBalancer  + '/joingroup', {
             uid: cookies.get('uid'),
-            gid: gid 
+            gid: gid,
+            header: { 'Content-Type': 'application/x-www-form-urlencoded' }
         }).then((res) => {
             if (res.data === 'Already joined') {
                 this.getUnreadMessage(gid, false);
                 this.setState({
                     ...this.state,
-                    selectedGroup: gid,
-                }, () => {
-                    this.startPolling();
+                    selectedGid: gid,
                 });
             }
             else if (res.data === 'Joined') {
                 this.getAllMessage(gid);
                 this.setState({
                     ...this.state,
-                    selectedGroup: gid,
-                }, () => {
-                    this.startPolling();
+                    selectedGid: gid,
                 });
             }
             else {
@@ -135,11 +147,11 @@ class ChatPage extends Component {
                 messages: (append) ? this.state.messages.push(...res.data.messages) : res.data.messages,
             }, () => {
                 const lastMsg = document.getElementById('msg-0');
-                lastMsg.scrollIntoView({behavior: 'smooth'});
-            })
+                if (lastMsg) lastMsg.scrollIntoView({behavior: 'smooth'});
+            });
         }).catch((err) => {
             console.error(err);
-            message.error('Error getting unread messages')
+            message.error('Error getting unread messages');
         });
     };
     
@@ -323,12 +335,25 @@ class ChatPage extends Component {
 
     // Set selectedKey and send join request
     handleMenuSelect = (e) => {
-        // TODO: Is name == gid ?
+        const idx = parseInt(e.key.slice(1,e.key.length));
+        var gid = '';
+        var gname = '';
+        if (e.key.slice(0,1) === 'j') {
+            gid = this.state.joinedList[idx]._id;
+            gname = this.state.joinedList[idx].name;
+        }
+        else {
+            gid = this.state.allList[idx]._id;
+            gname = this.state.allList[idx].name;
+        }
+
         this.setState({
             ...this.state,
             selectedKey: e.key,
+            selectedGid: gid,
+            selectedGroup: gname,
         })
-        this.selectGroup(e.key.slice(1,e.key.length));
+        this.selectGroup(gid);
     };
 
     handleLogOut = () => {
@@ -362,15 +387,7 @@ class ChatPage extends Component {
     }
 
     handleLeaveGroup = () => {
-        this.leaveGroup(this.state.selectedGroup)
-    }
-
-    startPolling = () => {
-        this.pollInterval = setInterval(this.getUnreadMessage(this.selectGroup, true),300);
-    };
-
-    stopPolling = () => {
-        clearInterval(this.pollInterval);
+        this.leaveGroup(this.state.selectedGid)
     }
 
     render() {
@@ -403,8 +420,7 @@ class ChatPage extends Component {
                         <Input
                         placeholder='Group name'
                         value={this.state.createName}
-                        onChange={(e)=>{this.setState({...this.state,createName: e.target.value,});
-                        }}
+                        onChange={(e)=>{this.setState({...this.state,createName: e.target.value,})}}
                         />
                         <Button onClick={this.handleCreateGroupSubmit}>CREATE</Button>
                     </div>

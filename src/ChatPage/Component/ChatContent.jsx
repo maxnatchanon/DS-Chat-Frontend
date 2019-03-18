@@ -65,7 +65,7 @@ export default class ChatContent extends Component {
                     { this.props.messages.map((msg,idx) => 
                         <Message key={idx}
                         id={'msg-' + (this.props.messages.length - idx - 1)}
-                        message={{text: msg.content, sender: msg.uid, timestamp: msg.send_at}}
+                        message={{text: msg.content, suid: msg.user._id, sender: msg.user.name, timestamp: msg.send_at}}
                         uid={this.props.clientID}
                         /> 
                     ) }
@@ -93,11 +93,12 @@ class Message extends Component {
 
     formatDate = (date) => {
         var res = '';
+        const d = new Date(date);
         try {
-            if(parseInt(date.getMinutes())<10)
-                res = date.getHours() + ':' + '0' + date.getMinutes();
+            if(parseInt(d.getMinutes())<10)
+                res = d.getHours() + ':' + '0' + d.getMinutes();
             else   
-                res = date.getHours() + ':' + date.getMinutes();
+                res = d.getHours() + ':' + d.getMinutes();
         }
         catch {
             res = '';
@@ -106,7 +107,7 @@ class Message extends Component {
     }
 
     render() {
-        const isMyMsg = (this.props.message.sender === this.props.uid);
+        const isMyMsg = (this.props.message.suid === this.props.uid);
         return (
             <div className={'message-container message-' + ((isMyMsg) ? 'right' : 'left')} id={this.props.id}>
                 <div className='sender'>
