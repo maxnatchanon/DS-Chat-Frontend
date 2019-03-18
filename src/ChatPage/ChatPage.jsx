@@ -41,14 +41,15 @@ class ChatPage extends Component {
         this.socket.emit('connection', {content: 'HI'});
         this.socket.on('chat', (res) => {
             var messages = this.state.messages;
-            messages.push(res.message)
+            console.log(res.message.gid, this.state.selectedGid)
             if (res.message.gid === this.state.selectedGid) {
                 this.setState({
                     ...this.state,
                     messages: messages,
                 }, () => {
                     const lastMsg = document.getElementById('msg-0');
-                    lastMsg.scrollIntoView({behavior: 'smooth'});
+                    if (lastMsg) lastMsg.scrollIntoView({behavior: 'smooth'});
+                    this.setRead(this.state.selectedGid);
                 });
             }
         });
@@ -64,10 +65,12 @@ class ChatPage extends Component {
         axios.get(ip.loadBalancer + `/getuserinformation?uid=${cookies.get('uid')}`)
         .then((res) => {
             if (res.data === 'ERROR') throw 'asd';
-            const myData = res.data.groups.length ? [...res.data.groups].sort((x, y) => x.name.localeCompare(y.name) ) : [];
+            console.log([...res.data.groups])
+            const myData = res.data.groups.length ? [...res.data.groups] : [];
+            const filteredData = myData.filter((data) => (data.name))
             this.setState({
                 ...this.state,
-                joinedList: myData,
+                joinedList: filteredData,
             });
         }).catch((err) => {
             console.error(err);
@@ -83,9 +86,10 @@ class ChatPage extends Component {
         axios.get(ip.loadBalancer  + '/getgroup')
         .then((res) => {
             if (res.data === 'ERROR') throw 'asd';
+            const filteredData = res.data.filter((data => (data.name)))
             this.setState({
                 ...this.state,
-                allList: res.data,
+                allList: filteredData,
             });
         }).catch((err) => {
             console.error(err);
@@ -122,7 +126,7 @@ class ChatPage extends Component {
                 });
             }
             else {
-                message.error(res.body);
+                message.error('Error joining group');
             }
         }).catch((err) => {
             message.error('Error joining group')
@@ -150,12 +154,21 @@ class ChatPage extends Component {
             }, () => {
                 const lastMsg = document.getElementById('msg-0');
                 if (lastMsg) lastMsg.scrollIntoView({behavior: 'smooth'});
+                this.setRead(gid);
             });
         }).catch((err) => {
             console.error(err);
             message.error('Error getting unread messages');
         });
     };
+
+    setRead = (gid) => {
+        axios.post(ip.loadBalancer  + '/setread', {
+            uid: cookies.get('uid'),
+            gid: gid,
+            header: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        });
+    }
     
     // Get all messages
     // Replace this.state.message with all messages in the group
@@ -169,7 +182,7 @@ class ChatPage extends Component {
                 messages: res.data.messages,
             }, () => {
                 const lastMsg = document.getElementById('msg-0');
-                lastMsg.scrollIntoView({behavior: 'smooth'});
+                if (lastMsg) lastMsg.scrollIntoView({behavior: 'smooth'});
             })
         }).catch((err) => {
             console.error(err);
@@ -187,6 +200,13 @@ class ChatPage extends Component {
             gid: gid,
         }).then((res) => {
             this.getJoinedGroups();
+            this.setState({
+                ...this.state,
+                selectedKey: '',
+                selectedGroup: '',
+                messages: [],
+            });
+        }).catch(() => {
             this.setState({
                 ...this.state,
                 selectedKey: '',
@@ -327,13 +347,12 @@ class ChatPage extends Component {
             gid = this.state.allList[idx]._id;
             gname = this.state.allList[idx].name;
         }
-
         this.setState({
             ...this.state,
             selectedKey: e.key,
             selectedGid: gid,
             selectedGroup: gname,
-        })
+        });
         this.selectGroup(gid);
     };
 
@@ -368,7 +387,11 @@ class ChatPage extends Component {
     }
 
     handleLeaveGroup = () => {
-        this.leaveGroup(this.state.selectedGid)
+        this.leaveGroup(this.state.selectedGid);
+    }
+
+    handleExitGroup = () => {
+        this.exitGroup(this.state.selectedGid);
     }
 
     render() {
@@ -388,6 +411,7 @@ class ChatPage extends Component {
                 handleSendMessage={this.handleSendMessage}
                 selectedGroup={this.state.selectedGroup}
                 handleLeaveGroup={this.handleLeaveGroup}
+                handleExitGroup={this.handleExitGroup}
                 />
 
                 <Modal

@@ -35,7 +35,7 @@ export default class ChatSider extends Component {
                         ) }
                     </SubMenu>
                     <SubMenu key='allGroup' title={<span><Icon type="bars"/>All Group</span>}>
-                        { this.props.state.allList.slice(1,this.props.state.allList.length).map((group,idx) => 
+                        { this.props.state.allList/*.slice(1,this.props.state.allList.length)*/.map((group,idx) => 
                             <Menu.Item key={'a'+idx}>{group.name}</Menu.Item>
                         ) }
                     </SubMenu>

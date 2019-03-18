@@ -52,6 +52,14 @@ export default class ChatContent extends Component {
                     <span className='leaveButton' style={{visibility: ((this.props.selectedGroup === '') ?  'hidden' : 'visible')}}>
                         <Popconfirm
                         placement='bottomRight'
+                        title={'Exit group?'}
+                        onConfirm={this.props.handleExitGroup}
+                        okText='Confirm' cancelText='Cancel'
+                        >
+                            <Icon style={{marginRight:'15px'}} type='double-left' />
+                        </Popconfirm>
+                        <Popconfirm
+                        placement='bottomRight'
                         title={'Leave group?'}
                         onConfirm={this.props.handleLeaveGroup}
                         okText='Confirm' cancelText='Cancel'
