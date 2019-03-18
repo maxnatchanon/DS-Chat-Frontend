@@ -94,7 +94,10 @@ class Message extends Component {
     formatDate = (date) => {
         var res = '';
         try {
-            res = date.getHours() + ':' + date.getMinutes();
+            if(parseInt(date.getMinutes())<10)
+                res = date.getHours() + ':' + '0' + date.getMinutes();
+            else   
+                res = date.getHours() + ':' + date.getMinutes();
         }
         catch {
             res = '';
