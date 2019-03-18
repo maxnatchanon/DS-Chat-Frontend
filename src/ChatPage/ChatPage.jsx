@@ -20,8 +20,11 @@ class ChatPage extends Component {
         // cookies.set('uid','Max');
         this.state = {
             joinedList: [{name: 'Group A'}, {name: 'Group B'}, {name: 'Group C'}, {name: 'Group D'},],
-            allList: [{name: 'Group A'}, {name: 'Group B'}, {name: 'Group C'}, {name: 'Group D'}, {name: 'Group E'}, {name: 'Group F'},],
-            selected: 'jGroup A',
+            allList: [
+                {name: 'Group A'}, {name: 'Group B'}, {name: 'Group C'}, {name: 'Group D'}, {name: 'Group E'}, {name: 'Group F'},
+                {name: 'Group G'}, {name: 'Group H'}, {name: 'Group I'}, {name: 'Group J'}, {name: 'Group K'},
+            ],
+            selectedGroup: 'Group A',
             settingVisible: false,
             createVisible: false,
             createName: '',
@@ -52,7 +55,7 @@ class ChatPage extends Component {
                 ...this.state,
                 joinedList: myData,
                 messages: [],
-                selected: '',
+                selectedGroup: '',
             });
         }).catch((err) => {
             console.error(err);
@@ -78,7 +81,7 @@ class ChatPage extends Component {
     selectGroup = (gid) => {
         this.setState({
             ...this.state,
-            selected: gid,
+            selectedGroup: gid,
         });
 
         // Join group
@@ -181,7 +184,7 @@ class ChatPage extends Component {
             this.getJoinedGroups();
             this.setState({
                 ...this.state,
-                selected: '',
+                selectedGroup: '',
                 messages: [],
             });
         });
@@ -196,7 +199,7 @@ class ChatPage extends Component {
             this.getJoinedGroups();
             this.setState({
                 ...this.state,
-                selected: '',
+                selectedGroup: '',
                 messages: [],
             });
         });
@@ -228,10 +231,11 @@ class ChatPage extends Component {
         //     const lastMsg = document.getElementById('msg-0');
         //     lastMsg.scrollIntoView({behavior: 'smooth'});
         // })
+        // return;
         axios.post(ip.loadBalancer + '/sendm', {
             content: msg,
             uid: cookies.get('uid'),
-            gid: this.state.selected
+            gid: this.state.selectedGroup
         }).then((res) => {
             console.log(res);
         }).catch((err) => {
@@ -251,7 +255,7 @@ class ChatPage extends Component {
 
     handleMenuSelect = (e) => {
         // TODO: Is name == gid ?
-        this.selectGroup(e.key);
+        this.selectGroup(e.key.slice(1,e.key.length));
     }
 
     handleLogOut = () => {
@@ -284,6 +288,10 @@ class ChatPage extends Component {
         }
     }
 
+    handleLeaveGroup = () => {
+        this.leaveGroup(this.state.selectedGroup)
+    }
+
     render() {
         return (
             <Layout className='c-background'>
@@ -299,7 +307,8 @@ class ChatPage extends Component {
                 messages={this.state.messages}
                 clientID={cookies.get('uid')}
                 handleSendMessage={this.handleSendMessage}
-                selected={this.state.selected}
+                selectedGroup={this.state.selectedGroup}
+                handleLeaveGroup={this.handleLeaveGroup}
                 />
 
                 <Modal

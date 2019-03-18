@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Layout, Divider, Input, Button } from 'antd';
+import { Layout, Divider, Input, Button, Icon, Popconfirm } from 'antd';
 import 'antd/dist/antd.css';
 import './ChatContent.css';
 
@@ -47,7 +47,17 @@ export default class ChatContent extends Component {
         return (
             <Content className='chat-content-container'>
                 <div className='chat-content-header center-child'>
-                    { this.props.selected.slice(1, this.props.selected.length) }
+                    <span>{ this.props.selectedGroup }</span>
+                    <span className='leaveButton'>
+                    <Popconfirm
+                    placement='bottomRight'
+                    title={'Leave group?'}
+                    onConfirm={this.props.handleLeaveGroup}
+                    okText='Confirm' cancelText='Cancel'
+                    >
+                        <Icon type='logout' />
+                    </Popconfirm>
+                    </span>
                 </div>
                 <div className='chat-content-divider'><Divider/></div>
                 <div className='chat-message-container'>

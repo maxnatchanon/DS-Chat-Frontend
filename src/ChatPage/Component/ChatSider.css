@@ -1,3 +1,7 @@
+.sider {
+    overflow-y: scroll;
+}
+
 .chat-header {
     color: var(--light-text-color);
     font-size: 1.50em;

@@ -121,3 +121,9 @@
     flex-direction: row;
     align-items: center;
 }
+
+.leaveButton {
+    position: absolute;
+    right: 20px;
+    color: var('dark-text-color')
+}
