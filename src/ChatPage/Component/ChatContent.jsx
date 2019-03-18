@@ -53,6 +53,7 @@ export default class ChatContent extends Component {
                 <div className='chat-message-container'>
                     { this.props.messages.map((msg,idx) => 
                         <Message key={idx}
+                        id={'msg-' + (this.props.messages.length - idx - 1)}
                         message={{text: msg.content, sender: msg.uid, timestamp: msg.send_at}}
                         uid={this.props.clientID}
                         /> 
@@ -93,7 +94,7 @@ class Message extends Component {
     render() {
         const isMyMsg = (this.props.message.sender === this.props.uid);
         return (
-            <div className={'message-container message-' + ((isMyMsg) ? 'right' : 'left')}>
+            <div className={'message-container message-' + ((isMyMsg) ? 'right' : 'left')} id={this.props.id}>
                 <div className='sender'>
                     { this.props.message.sender }
                 </div>

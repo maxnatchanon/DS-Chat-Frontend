@@ -17,6 +17,7 @@ class ChatPage extends Component {
 
     constructor(props) {
         super(props);
+        // cookies.set('uid','Max');
         this.state = {
             joinedList: [{name: 'Group A'}, {name: 'Group B'}, {name: 'Group C'}, {name: 'Group D'},],
             allList: [{name: 'Group A'}, {name: 'Group B'}, {name: 'Group C'}, {name: 'Group D'}, {name: 'Group E'}, {name: 'Group F'},],
@@ -85,8 +86,11 @@ class ChatPage extends Component {
             uid: cookies.get('uid'),
             gid: gid 
         }).then((res) => {
-            if (res.data === 'Already joined' || res.data === 'Joined') {
+            if (res.data === 'Already joined') {
                 this.getUnreadMessage(gid, false);
+            }
+            else if (res.data === 'Joined') {
+                this.getAllMessage(gid);
             }
             else {
                 message.error(res.body);
@@ -104,6 +108,9 @@ class ChatPage extends Component {
             this.setState({
                 ...this.state,
                 messages: (append) ? this.state.messages.push(...res.data.messages) : res.data.messages,
+            }, () => {
+                const lastMsg = document.getElementById('msg-0');
+                lastMsg.scrollIntoView({behavior: 'smooth'});
             })
         }).catch((err) => {
             console.error(err);
@@ -111,6 +118,22 @@ class ChatPage extends Component {
         });
     }
     
+    getAllMessage = (gid) => {
+        axios.get(ip.loadBalancer + '/getm?gid=' + gid)
+        .then((res) => {
+            this.setState({
+                ...this.state,
+                messages: res.data.messages,
+            }, () => {
+                const lastMsg = document.getElementById('msg-0');
+                lastMsg.scrollIntoView({behavior: 'smooth'});
+            })
+        }).catch((err) => {
+            console.error(err);
+            message.error('Error getting all messages')
+        });
+    }
+
     // TODO: ???
     // getMessage = async () => {
     //     let messages = this.state.messages;
@@ -195,13 +218,16 @@ class ChatPage extends Component {
 
     // Send new message
     sendMessage = (msg) => {
-        // scroller.scrollTo('Message', {
-        //     duration: 1500,
-        //     delay: 100,
-        //     smooth: true,
-        //     containerId: this.state.messages.length-1,
-        //     offset: 50, // Scrolls to element + 50 pixels down the page
-        //   });
+        // var msgs = this.state.messages;
+        // msgs.push({gid: 'A', uid: 'Max', content: msg, send_at: new Date()})
+        // console.log(msg);
+        // this.setState({
+        //     ...this.state,
+        //     messages: msgs,
+        // }, () => {
+        //     const lastMsg = document.getElementById('msg-0');
+        //     lastMsg.scrollIntoView({behavior: 'smooth'});
+        // })
         axios.post(ip.loadBalancer + '/sendm', {
             content: msg,
             uid: cookies.get('uid'),
