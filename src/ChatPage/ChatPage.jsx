@@ -128,6 +128,8 @@ class ChatPage extends Component {
             else {
                 message.error('Error joining group');
             }
+            this.getAllgroup();
+            this.getJoinedGroups();
         }).catch((err) => {
             message.error('Error joining group')
             console.error(err);
