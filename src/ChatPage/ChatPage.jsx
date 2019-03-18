@@ -42,14 +42,15 @@ class ChatPage extends Component {
         this.socket.on('chat', (res) => {
             var messages = this.state.messages;
             messages.push(res.message)
-            console.log(res.message.user)
-            this.setState({
-                ...this.state,
-                messages: messages,
-            }, () => {
-                const lastMsg = document.getElementById('msg-0');
-                lastMsg.scrollIntoView({behavior: 'smooth'});
-            });
+            if (res.message.gid === this.state.selectedGid) {
+                this.setState({
+                    ...this.state,
+                    messages: messages,
+                }, () => {
+                    const lastMsg = document.getElementById('msg-0');
+                    lastMsg.scrollIntoView({behavior: 'smooth'});
+                });
+            }
         });
     };
 
@@ -227,7 +228,10 @@ class ChatPage extends Component {
         }).then((res) => {
             this.getJoinedGroups();
             this.getAllgroup();
-            console.log(res);
+            this.setState({
+                ...this.state,
+                createVisible: false,
+            })
         }).catch((err) => {
             console.error(err);
             message.error('Error creating group')
@@ -301,30 +305,6 @@ class ChatPage extends Component {
     // }
 
     // ====================================================
-
-    loadMockupData = () => {
-        cookies.set('uid','Max');
-        this.setState({
-            joinedList: [{name: 'Group A'}, {name: 'Group B'}, {name: 'Group C'}, {name: 'Group D'},],
-            allList: [
-                {name: 'Group A'}, {name: 'Group B'}, {name: 'Group C'}, {name: 'Group D'}, {name: 'Group E'}, {name: 'Group F'},
-                {name: 'Group G'}, {name: 'Group H'}, {name: 'Group I'}, {name: 'Group J'}, {name: 'Group K'},
-            ],
-            selectedKey: 'jGroup A',
-            selectedGroup: 'Group A',
-            settingVisible: false,
-            createVisible: false,
-            createName: '',
-            messages: [
-                {gid: 'A', uid: 'Max', content: 'Mockup chat incoming.', send_at: new Date()},
-                {gid: 'A', uid: 'Max', content: 'https://github.com/manussawee/dissys_miniproject/', send_at: new Date()},
-                {gid: 'A', uid: 'Yoss', content: 'Just copy it!', send_at: new Date()},
-                {gid: 'A', uid: 'Sun', content: '🔥', send_at: new Date()},
-                {gid: 'A', uid: 'Jui', content: 'Why is parallel so easy?', send_at: new Date()},
-                {gid: 'A', uid: 'Tan', content: '...', send_at: new Date()},
-            ],
-        })
-    }
 
     // Set visibility of logout popover
     handlePopOverChange = (visible) => {
