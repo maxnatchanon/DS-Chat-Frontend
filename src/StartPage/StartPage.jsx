@@ -23,6 +23,9 @@ class StartPage extends Component {
         });
     }
 
+    // Register /Log in using inputted username then go to chat page
+    // POST /register
+    // Parameter: name
     handleLogIn = () => {
         axios.post(ip.loadBalancer + '/register', { name: this.state.username })
         .then((res) => {

@@ -36,16 +36,12 @@ class ChatPage extends Component {
         this.getJoinedGroups();
         // Get all group -> joinGroup
         this.getAllgroup();
-        // Load mockup data
-        // this.loadMockupData();
-        this.socket.emit('connection', {content: 'HI'});
+
+        this.socket.emit('connection', {content: 'Connection from client'});
         this.socket.on('chat', (res) => {
-            var messages = this.state.messages;
-            messages.push(res.message);
-            console.log(res.message.gid, this.state.selectedGid)
             if (res.message.gid === this.state.selectedGid) {
-                console.log(messages)
-                
+                var messages = this.state.messages;
+                messages.push(res.message);
                 this.setState({
                     ...this.state,
                     messages: messages,
@@ -131,8 +127,8 @@ class ChatPage extends Component {
             else {
                 message.error('Error joining group');
             }
-            // this.getAllgroup();
-            // this.getJoinedGroups();
+            this.getAllgroup();
+            this.getJoinedGroups();
         }).catch((err) => {
             message.error('Error joining group')
             console.error(err);
@@ -267,17 +263,6 @@ class ChatPage extends Component {
     // POST /sendm
     // Parameter: uid, gid, content
     sendMessage = (msg) => {
-        // var msgs = this.state.messages;
-        // msgs.push({gid: 'A', uid: 'Max', content: msg, send_at: new Date()})
-        // console.log(msg);
-        // this.setState({
-        //     ...this.state,
-        //     messages: msgs,
-        // }, () => {
-        //     const lastMsg = document.getElementById('msg-0');
-        //     lastMsg.scrollIntoView({behavior: 'smooth'});
-        // })
-        // return;
         axios.post(ip.loadBalancer + '/sendm', {
             content: msg,
             uid: cookies.get('uid'),
@@ -330,7 +315,6 @@ class ChatPage extends Component {
     };
 
     handleSendMessage = (msg) => {
-        // Send Message
         this.sendMessage(msg);
     };
 
