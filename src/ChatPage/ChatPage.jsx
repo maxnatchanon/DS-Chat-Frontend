@@ -36,7 +36,10 @@ class ChatPage extends Component {
         this.getJoinedGroups();
         // Get all group -> joinGroup
         this.getAllgroup();
+        this.openSocket()
+    };
 
+    openSocket = () => {
         this.socket.emit('connection', {content: 'Connection from client'});
         this.socket.on('chat', (res) => {
             if (res.message.gid === this.state.selectedGid) {
@@ -51,9 +54,8 @@ class ChatPage extends Component {
                     this.setRead(this.state.selectedGid);
                 });
             }
-        });
-    };
-
+        });   
+    }
     // ====================================================
 
     // Get joined groups -> joinedList
