@@ -39,7 +39,18 @@ class StartPage extends Component {
             console.error(err);
         });
     }
-
+    
+    handleLogOut = () => {
+        axios.post(ip.loadBalancer + '/logout', { name: this.state.username })
+        .then((res) => {
+            window.location = '/';
+        })
+        .catch((err) => {
+            message.error('Logout error');
+            console.error(err);
+        });
+    }
+    
     render() {
         return (
             <div className='s-background center-child'>
