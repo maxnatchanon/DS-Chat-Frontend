@@ -6,7 +6,7 @@
 
 .login-container {
     background-color: white;
-    width: 320px;
+    width: 325px;
     height: 222px;
     border-radius: 12px;
     box-shadow: 0 3px 10px rgb(0, 0, 0, 0.15);
@@ -19,6 +19,8 @@
     color: var(--light-text-color);
     font-size: 2em;
     font-weight: 400;
+    font-color: rgb(244, 192, 0, 0.15);
+    user-select: none;
 }
 
 .login-container > .body {
